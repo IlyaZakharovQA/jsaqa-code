@@ -1,15 +1,18 @@
 {
-  "name": "jsaqa_3_2",
+  "name": "playwright-7.3.-2",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "main": "user.js",
   "scripts": {
     "test": "playwright"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@playwright/test": "^1.12.3",
-    "playwright": "^1.12.3"
-  }
+    "@playwright/test": "^1.35.1",
+    "playwright": "^1.35.1"
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "description": ""
 }

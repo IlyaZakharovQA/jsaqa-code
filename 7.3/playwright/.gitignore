@@ -10,3 +10,7 @@
 
 # Local History for Visual Studio Code
 .history/
+user.js
+/test-results/
+/playwright-report/
+/playwright/.cache/
