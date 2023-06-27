@@ -1,94 +1,45 @@
 const { clickElement, getText } = require("./lib/commands");
-const daysWeek = require("./pageIndex");
-const plases = require("./pageHall");
 
 let page;
 
 beforeEach(async () => {
   page = await browser.newPage();
-  await page.setDefaultNavigationTimeout(60000);
-});
+  await page.goto("http://qamid.tmweb.ru/client/index.php");
+  await clickElement(page, "a:nth-child(2) > span.page-nav__day-week");
 
-afterEach(() => {
-  page.close();
-});
-
-describe("Ticket booking", () => {
-  beforeEach(async () => {
-    page = await browser.newPage();
-    await page.goto("http://qamid.tmweb.ru/client/index.php", {
-      timeout: 60000,
-    });
+  afterEach(() => {
+    page.close();
   });
-  beforeAll(async () => {
-    page = await browser.newPage();
-    await page.goto("http://qamid.tmweb.ru/client/index.php", {
-      timeout: 60000,
-    });
-    await clickElement(page, daysWeek.secondDay);
-    await clickElement(page, daysWeek.movi3Day);
-    await page.waitForSelector("h1");
-    await clickElement(page, plases.row2Plase10);
-    await clickElement(page, "button");
-    await page.waitForSelector("h1");
-    await clickElement(page, "button");
-    await page.waitForSelector("h1");
-  }, 60000);
 
-  test("should book one VIP seat", async () => {
-    await clickElement(page, daysWeek.fifthDay);
-    await clickElement(page, daysWeek.movi1Evening);
-    await page.waitForSelector("h1");
-    await clickElement(page, plases.row1PlaseVip);
-    await clickElement(page, "button");
-    await page.waitForSelector("h1");
-    const actual = await getText(
+  test("Should book one ticket", async () => {
+    await clickElement(
       page,
-      "main > section > div > p:nth-child(2) > span",
-      (text) => text.textContent
+      ".buying-scheme__chair_standart:not(.buying-scheme__chair_taken)"
     );
-    const expected = "1/2";
-    const actualPrise = await getText(
-      page,
-      "main > section > div > p:nth-child(6) > span",
-      (text) => text.textContent
-    );
-    const expectedPrise = "350";
-    expect(actual).toContain(expected);
-    expect(actualPrise).toContain(expectedPrise);
-  }, 60000);
+    await clickElement(page, "button.acceptin-button");
+    const actual = await getText(page, "h2.ticket__check-title");
+    expect(actual).toContain("Вы выбрали билеты:");
+  });
 
-  test("should book two seats", async () => {
-    await clickElement(page, daysWeek.sixthDay);
-    await clickElement(page, daysWeek.movi3Morning);
-    await page.waitForSelector("h1");
-    await clickElement(page, plases.row5Plase5);
-    await clickElement(page, plases.row5Plase6);
-    await clickElement(page, "button");
-    await page.waitForSelector("h1");
-    const actual = await getText(
+  test("Should book two tickets", async () => {
+    await clickElement(
       page,
-      "main > section > div > p:nth-child(2) > span",
-      (text) => text.textContent
+      "div:nth-child(7) > .buying-scheme__chair_standart:not(.buying-scheme__chair_taken)"
     );
-    const expected = "5/5, 5/6";
-    const actualPrise = await getText(
+    await clickElement(
       page,
-      "main > section > div > p:nth-child(6) > span",
-      (text) => text.textContent
+      ".buying-scheme__chair_selected + :not(.buying-scheme__chair_taken)"
     );
-    const expectedPrise = "200";
-    expect(actual).toContain(expected);
-    expect(actualPrise).toContain(expectedPrise);
-  }, 60000);
+    await clickElement(page, "button.acceptin-button");
+    const actual = await getText(page, "h2.ticket__check-title");
+    expect(actual).toContain("Вы выбрали билеты:");
+  });
 
-  test.skip("should not book", async () => {
-    await clickElement(page, daysWeek.secondDay);
-    await clickElement(page, daysWeek.movi3Day);
-    await page.waitForSelector("h1");
-    await clickElement(page, plases.row2Plase10);
-    const actual = await getText(page, "h2", (text) => text.textContent);
-    const expected = "Фильм 3";
-    expect(actual).toContain(expected);
-  }, 60000);
+  test("Should try to book taken chair", async () => {
+    await clickElement(page, "div > .buying-scheme__chair_taken");
+    const actual = await page.$eval(".acceptin-button", (link) =>
+      link.getAttribute("disabled")
+    );
+    expect(actual).toEqual("true");
+  });
 });
